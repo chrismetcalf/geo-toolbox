@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+mvn --quiet exec:java -Dexec.mainClass=com.socrata.geotoolbox.Reprojector -Dexec.args="$*"
