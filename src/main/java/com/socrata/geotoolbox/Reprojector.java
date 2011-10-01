@@ -94,6 +94,7 @@ public class Reprojector {
                 // Add it to our line
                 newLine.add(Double.toString(to.x));
                 newLine.add(Double.toString(to.y));
+                newLine.add("(" + Double.toString(to.x) + ", " + Double.toString(to.y) + ")");
             } catch(RuntimeException e) {
                 // Nom Nom!
                 if(options.has("verbose"))
