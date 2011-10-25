@@ -13,6 +13,7 @@ import org.opengis.referencing.operation.MathTransform;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,7 @@ public class Reprojector {
         parser.accepts("x-index").withRequiredArg().ofType(Integer.class);
         parser.accepts("y-index").withRequiredArg().ofType(Integer.class);
         parser.accepts("skip").withRequiredArg().ofType(Integer.class);
+        parser.accepts("tab");
 
         OptionSet options = parser.parse(args);
 
@@ -58,16 +60,28 @@ public class Reprojector {
         if(options.hasArgument("y-index"))
             yCol = (Integer)options.valueOf("y-index");
 
+        Reader stream = null;
+        if(options.hasArgument("file")) {
+            stream = new FileReader((String) options.valueOf("file"));
+        } else {
+            stream = new InputStreamReader(System.in);
+        }
+
         // Open our CSV
         CSVReader reader = null;
-        if(options.hasArgument("file")) {
-            reader = new CSVReader(new FileReader((String) options.valueOf("file")));
+        if(options.has("tab")) {
+            reader = new CSVReader(stream, '\t');
         } else {
-            reader = new CSVReader(new InputStreamReader(System.in));
+            reader = new CSVReader(stream);
         }
 
         // For output!
-        CSVWriter writer = new CSVWriter(new OutputStreamWriter(System.out));
+        CSVWriter writer = null;
+        if(options.has("tab")) {
+            writer = new CSVWriter(new OutputStreamWriter(System.out), '\t', CSVWriter.NO_QUOTE_CHARACTER);
+        } else {
+            writer = new CSVWriter(new OutputStreamWriter(System.out));
+        }
 
         // Skip!
         if(options.hasArgument("skip")) {
@@ -98,7 +112,7 @@ public class Reprojector {
             } catch(RuntimeException e) {
                 // Nom Nom!
                 if(options.has("verbose"))
-                    System.err.println("Exception: " + e) ;
+                    System.err.println("Exception: " + e);
             }
 
             writer.writeNext((String[]) newLine.toArray(new String[newLine.size()]));
